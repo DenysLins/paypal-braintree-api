@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "format": "prettier --write .",
     "lint": "eslint . ",
-    "lint:fix": "eslint . --fix "
+    "lint:fix": "eslint . --fix ",
+    "format": "prettier --write ."
   },
   "author": "",
   "license": "ISC",

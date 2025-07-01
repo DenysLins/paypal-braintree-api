@@ -1,0 +1,62 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 768px;
+  margin: auto;
+}
+
+.fruit-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 80%;
+  margin: 3px;
+}
+
+.buttons {
+  margin: 6px;
+}
+
+.button {
+  margin: 0px 6px;
+}
+
+.total {
+  margin: 24px;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.dropin-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /*width: 640px;*/
+}
+
+#braintree-drop-in-div {
+  width: 640px;
+}
+
+.transaction {
+  font-weight: bold;
+  margin: 2px;
+}

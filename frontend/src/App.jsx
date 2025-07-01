@@ -1,7 +1,8 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 import axios from 'axios';
-import BraintreeDropIn from './BraintreeDropIn.jsx';
+import DropIn from './DropIn.jsx';
+import { Button } from 'antd';
 
 const fruitsList = [
   {
@@ -32,17 +33,18 @@ const fruitsList = [
 ];
 
 function App() {
-  const [clientToken, setClientToken] = useState(null);
+  const [token, setToken] = useState(null);
   const [show, setShow] = useState(false);
   const [requestFailed, setRequestFailed] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
   const [response, setResponse] = useState({});
+  const [loadingDropIn, setLoadingDropIn] = useState(false);
   const [fruits, setFruits] = useState({
-    Apple: {quantity: 0, price: 0},
-    Orange: {quantity: 0, price: 0},
-    Banana: {quantity: 0, price: 0},
-    Grapes: {quantity: 0, price: 0},
-    Mango: {quantity: 0, price: 0},
+    Apple: { quantity: 0, price: 0 },
+    Orange: { quantity: 0, price: 0 },
+    Banana: { quantity: 0, price: 0 },
+    Grapes: { quantity: 0, price: 0 },
+    Mango: { quantity: 0, price: 0 },
   });
 
   useEffect(() => {
@@ -52,8 +54,8 @@ function App() {
   const getClientToken = async () => {
     try {
       const response = await axios.get('http://localhost:3000/client_token');
-      const clientToken = response.data;
-      setClientToken(clientToken);
+      const token = response.data;
+      setToken(token);
       setRequestFailed(false);
     } catch (err) {
       console.error(err);
@@ -62,23 +64,9 @@ function App() {
   };
 
   const reset = async () => {
-    setClientToken(null);
+    setToken(null);
     setRequestFailed(false);
     await getClientToken();
-  };
-
-  const renderFruit = (id, name, price) => {
-    return (
-      <div key={id}>
-        <div>Name: {name}</div>
-        <div>
-          Price: {price}
-          {'$ each'}
-        </div>
-        <button onClick={() => addToCart(name, price)}>+</button>
-        <button onClick={() => removeFromCart(name, price)}>-</button>
-      </div>
-    );
   };
 
   const addToCart = (name, price) => {
@@ -101,9 +89,29 @@ function App() {
     }
   };
 
+  const renderFruit = (id, name, price) => {
+    return (
+      <div key={id} className="fruit-container">
+        <div>Name: {name}</div>
+        <div>
+          Price: {price}
+          {'$ each'}
+        </div>
+        <div>
+          <Button type="primary" className="button" onClick={() => addToCart(name, price)}>
+            +
+          </Button>
+          <Button type="primary" className="button" onClick={() => removeFromCart(name, price)}>
+            -
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   const renderCart = () => {
-    const pharoots = Object.entries(fruitsList);
-    const cart = pharoots.map(([key, value]) => {
+    const fruits = Object.entries(fruitsList);
+    const cart = fruits.map(([key, value]) => {
       if (value.quantity) {
         return (
           <div>
@@ -118,46 +126,49 @@ function App() {
     return (
       <div>
         {cart}
-        <div>Total Price: {totalPrice}</div>
+        <div className="total">Total Price: {totalPrice}$</div>
       </div>
     );
   };
 
-  const onPaymentCompleted = async (response) => {
+  const onPaymentCompleted = async response => {
     setResponse(response);
-    setShow(false)
-
+    setShow(false);
   };
 
   const responseLoaded = Boolean(Object.keys(response).length);
   let responseMessage = '';
   if (Object.keys(response).length) {
     if (response.data.success) {
-      responseMessage = `Your purchase has been successful. Charged ${response.data.transaction.amount}`;
+      responseMessage = `Your purchase has been successful.`;
     } else {
       return (
         <div>
-          <button onClick={() => window.location.reload()}>{response.data.message} Reset</button>
+          <Button type="primary" onClick={() => window.location.reload()}>
+            {response.data.message} Reset
+          </Button>
         </div>
       );
     }
   }
-  if (!clientToken && !requestFailed) {
+  if (!token && !requestFailed) {
     return (
-      <div>
+      <div className="container">
         <h1>Loading...</h1>
       </div>
     );
   } else if (requestFailed) {
     return (
-      <div>
-        <button onClick={() => reset}>Request Failed! Reset</button>
+      <div className="container">
+        <Button type="primary" onClick={() => reset}>
+          Request Failed! Reset
+        </Button>
       </div>
     );
   } else {
     return (
-      <div>
-        <div>
+      <div className="container">
+        <div className="main">
           <h2>Buy Fruits Using Braintree</h2>
           {fruitsList.map(f => {
             return renderFruit(f.name, f.name, f.price);
@@ -166,23 +177,26 @@ function App() {
           {renderCart()}
         </div>
 
-        <button onClick={() => setShow(true)}> Purchase</button>
+        <Button
+          type="primary"
+          disabled={totalPrice === 0 || loadingDropIn === true}
+          className="button"
+          onClick={() => (totalPrice ? setShow(true) : false)}
+        >
+          {' '}
+          Purchase
+        </Button>
 
         <div>
-          <BraintreeDropIn
-            clientToken={clientToken}
-            show={show}
-            onPaymentCompleted={onPaymentCompleted}
-            totalPrice={totalPrice}
-          />
+          <DropIn token={token} show={show} onPaymentCompleted={onPaymentCompleted} totalPrice={totalPrice} setLoadingDropIn={setLoadingDropIn}/>
         </div>
 
         <div>
           <h3>{responseMessage}</h3>
         </div>
-        {responseLoaded && <div>Transaction Id: {response.data.transaction.id}</div>}
-        {responseLoaded && <div>Customer Id: {response.data.transaction.customer.id}</div>}
-        {responseLoaded && <div>Price Charged: {response.data.transaction.amount}</div>}
+        {responseLoaded && <div className="transaction">Transaction Id: {response.data.transaction.id}</div>}
+        {responseLoaded && <div className="transaction">Customer Id: {response.data.transaction.customer.id}</div>}
+        {responseLoaded && <div className="transaction">Price Charged: {response.data.transaction.amount}</div>}
       </div>
     );
   }

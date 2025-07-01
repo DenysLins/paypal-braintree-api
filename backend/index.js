@@ -48,8 +48,7 @@ app.get('/client_token', async (req, res) => {
 
 app.post('/checkout', async (req, res) => {
   try {
-    console.log(req.body)
-    const nonceFromTheClient = req.body.payment_method_nonce
+    const nonceFromTheClient = req.body.paymentMethodNonce
     const price = req.body.price
     const id = Math.floor(Math.random() * 1000) + 100
     const deviceDataFromTheClient = req.body.device_data
@@ -87,5 +86,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`App listening on port ${port}`)
 })
